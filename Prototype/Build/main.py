@@ -1,5 +1,6 @@
 import helper as hp
 import face_mesh_connections as fmc
+import main_functions as mf
 import cv2 as cv
 import numpy as np
 import mediapipe as mp
@@ -116,6 +117,7 @@ while True:
 
             anchor_x = (r_mid_x + l_mid_x) // 2
             anchor_y = (r_mid_y + l_mid_y) // 2
+            flip_x = True
 
             ## normalizing for both pupils to anchor (horizontal)
             # right normalization
@@ -125,6 +127,8 @@ while True:
             r_v = r_inner - r_outer
             r_u = r_pupil - r_outer
             r_nx_x = np.dot(r_u, r_v) / np.dot(r_v, r_v)
+            if flip_x is True:
+                r_nx_x = 1 - r_nx_x
             # left normalization
             l_outer = np.array([l_outer_x, l_outer_y])
             l_inner = np.array([l_inner_x, l_inner_y])
@@ -132,10 +136,16 @@ while True:
             l_v = l_inner - l_outer
             l_u = l_pupil - l_outer
             l_nx_x = np.dot(l_u, l_v) / np.dot(l_v, l_v)
-            #average
+            # averaging 
+            r_nx_x = np.clip(r_nx_x, 0.0, 1.0)
+            l_nx_x = np.clip(l_nx_x, 0.0, 1.0)
             nx_x = (l_nx_x + r_nx_x) / 2
+            #print(l_nx_x, r_nx_x)
             print(nx_x) #check
 
+            ## normalizing for both pupils to anchor (vertical)
+            
+            
 
             cv.circle(frame, (r_inner_x, r_inner_y), 1, (0, 0, 255), 1)
             cv.circle(frame, (r_outer_x, r_outer_y), 1, (0, 0, 255), 1)
